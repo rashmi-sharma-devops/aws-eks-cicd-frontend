@@ -1,0 +1,28 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo "Adding node_modules/.bin to PATH..."
+      - export PATH="$PATH:$PWD/node_modules/.bin"
+      - echo "Installing all npm dependencies..."
+      - npm install
+  
+  pre_build:
+    commands:
+      - echo "Getting Git commit hash from CodeBuild environment variable..."
+      - export REACT_APP_GIT_REVISION=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-8)
+      - echo "Frontend version (Git Revision) will be $REACT_APP_GIT_REVISION"
+      - export TZ="Asia/Kolkata"
+      - export REACT_APP_BUILD_TIMESTAMP_IST=$(date +"%A, %d %B %Y, %r IST")
+      - echo "Build started at - $REACT_APP_BUILD_TIMESTAMP_IST"          
+
+  build:
+    commands:
+      - echo "Running the build command..."
+      - npm run build:css && react-scripts build
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: build
